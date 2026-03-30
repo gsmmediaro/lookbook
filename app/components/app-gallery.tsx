@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { signOut } from "@/app/auth/actions";
+import { authClient } from "@/lib/auth/client";
 
 type Category = "Web Apps" | "Landing Pages" | "Mobile Apps";
 
@@ -260,14 +260,15 @@ export function AppGallery({
                     <p className="text-sm font-medium text-white truncate">{user?.name}</p>
                     <p className="text-xs text-white/40 truncate">{user?.email}</p>
                   </div>
-                  <form action={signOut}>
-                    <button
-                      type="submit"
-                      className="w-full text-left px-4 py-2.5 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
-                    >
-                      Log out
-                    </button>
-                  </form>
+                  <button
+                    onClick={async () => {
+                      await authClient.signOut();
+                      window.location.href = "/auth/sign-in";
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                  >
+                    Log out
+                  </button>
                 </div>
               )}
             </div>
