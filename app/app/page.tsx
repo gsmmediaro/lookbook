@@ -15,5 +15,11 @@ export default async function Home() {
   const apps = getApps();
   const categories = getCategories();
 
-  return <AppGallery apps={apps} categories={categories} />;
+  return (
+    <AppGallery
+      apps={apps}
+      categories={categories}
+      user={{ name: session.user.name, email: session.user.email }}
+    />
+  );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { signOut } from "@/app/auth/actions";
 
 type Category = "Web Apps" | "Landing Pages" | "Mobile Apps";
 
@@ -40,9 +41,11 @@ const DISCOVERY_BY_CATEGORY: Record<Category, { title: string; items: string[] }
 export function AppGallery({
   apps,
   categories,
+  user,
 }: {
   apps: AppEntry[];
   categories: Category[];
+  user?: { name: string; email: string };
 }) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("Web Apps");
@@ -50,6 +53,18 @@ export function AppGallery({
     "latest"
   );
   const [searchFocused, setSearchFocused] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filtered = useMemo(() => {
     let result = apps.filter((app) => {
@@ -232,8 +247,29 @@ export function AppGallery({
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
               </svg>
             </button>
-            <div className="ml-1 w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-[12px] font-semibold text-white">
-              S
+            <div className="relative ml-1" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-[12px] font-semibold text-white hover:ring-2 hover:ring-white/20 transition-shadow"
+              >
+                {user?.name?.charAt(0).toUpperCase() || "U"}
+              </button>
+              {userMenuOpen && (
+                <div className="absolute right-0 top-11 w-64 rounded-xl bg-[#1A1A1A] border border-white/10 shadow-2xl py-2 z-50">
+                  <div className="px-4 py-3 border-b border-white/10">
+                    <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+                    <p className="text-xs text-white/40 truncate">{user?.email}</p>
+                  </div>
+                  <form action={signOut}>
+                    <button
+                      type="submit"
+                      className="w-full text-left px-4 py-2.5 text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      Log out
+                    </button>
+                  </form>
+                </div>
+              )}
             </div>
           </div>
         </nav>
