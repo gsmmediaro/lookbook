@@ -49,12 +49,13 @@ function findAppInCatalog(nameQuery: string): AppInfo | undefined {
 
 server.tool(
   "list_apps",
-  "List all apps in the design library. Optionally filter by category (Mobile Apps, Web Apps, Landing Pages) or platform (ios, web, android).",
+  "List all apps in the design library. Optionally filter by category (Mobile Apps, Web Apps, Landing Pages), platform (ios, web, android), or genre (e.g. AI, Productivity, Health & Fitness).",
   {
     category: z.enum(["Mobile Apps", "Web Apps", "Landing Pages", "all"]).default("all").describe("Filter by category"),
     platform: z.string().optional().describe("Filter by platform: ios, web, android"),
+    genre: z.string().optional().describe("Filter by genre e.g. 'AI', 'Productivity', 'Health & Fitness', 'Finance', 'Social', 'Developer Tools'"),
   },
-  async ({ category, platform }) => {
+  async ({ category, platform, genre }) => {
     let apps = getCatalog();
 
     if (category !== "all") {
@@ -63,10 +64,13 @@ server.tool(
     if (platform) {
       apps = apps.filter((a) => a.platform === platform.toLowerCase());
     }
+    if (genre) {
+      apps = apps.filter((a) => a.genre.toLowerCase() === genre.toLowerCase());
+    }
 
     const lines = apps.map(
       (a) =>
-        `${a.name} | ${a.platform} | ${a.date || "n/a"} | ${a.category} | ${a.isZipped ? "zipped" : a.screenCount + " screens"}`
+        `${a.name} | ${a.genre} | ${a.platform} | ${a.date || "n/a"} | ${a.category} | ${a.isZipped ? "zipped" : a.screenCount + " screens"}`
     );
 
     return {
@@ -101,7 +105,7 @@ server.tool(
 
     const lines = apps.map(
       (a) =>
-        `${a.name} | ${a.platform} | ${a.date || "n/a"} | ${a.category} | ${a.isZipped ? "zipped" : a.screenCount + " screens"}`
+        `${a.name} | ${a.genre} | ${a.platform} | ${a.date || "n/a"} | ${a.category} | ${a.isZipped ? "zipped" : a.screenCount + " screens"}`
     );
 
     return {
@@ -143,6 +147,7 @@ server.tool(
           type: "text" as const,
           text: [
             `App: ${resolved.name}`,
+            `Genre: ${resolved.genre}`,
             `Platform: ${resolved.platform}`,
             `Date: ${resolved.date || "unknown"}`,
             `Category: ${resolved.category}`,

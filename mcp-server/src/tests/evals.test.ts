@@ -313,6 +313,7 @@ describe("Edge Cases", () => {
       platform: "web",
       date: "",
       category: "Web Apps",
+      genre: "Other",
       screenDir: "/fake",
       screenCount: 5,
       screens: ["a.png", "b.png", "c.png", "d.png", "e.png"],

@@ -15,6 +15,7 @@ interface AppEntry {
   platform: string;
   date: string;
   category: Category;
+  genre: string;
 }
 
 const DISCOVERY_BY_CATEGORY: Record<Category, { title: string; items: string[] }[]> = {
@@ -49,6 +50,7 @@ export function AppGallery({
 }) {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("Web Apps");
+  const [activeGenre, setActiveGenre] = useState<string | null>(null);
   const [sort, setSort] = useState<"latest" | "name" | "popular" | "top">(
     "latest"
   );
@@ -66,13 +68,21 @@ export function AppGallery({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const availableGenres = useMemo(() => {
+    const genreSet = new Set(
+      apps.filter((a) => a.category === activeCategory).map((a) => a.genre)
+    );
+    return Array.from(genreSet).sort();
+  }, [apps, activeCategory]);
+
   const filtered = useMemo(() => {
     let result = apps.filter((app) => {
       const matchesSearch = app.name
         .toLowerCase()
         .includes(search.toLowerCase());
       const matchesCategory = app.category === activeCategory;
-      return matchesSearch && matchesCategory;
+      const matchesGenre = !activeGenre || app.genre === activeGenre;
+      return matchesSearch && matchesCategory && matchesGenre;
     });
 
     if (sort === "name") {
@@ -80,7 +90,7 @@ export function AppGallery({
     }
 
     return result;
-  }, [apps, search, activeCategory, sort]);
+  }, [apps, search, activeCategory, activeGenre, sort]);
 
   function getDisplayName(fullName: string) {
     const parts = fullName.split(" ");
@@ -134,7 +144,7 @@ export function AppGallery({
               {orderedCategories.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setActiveCategory(cat)}
+                  onClick={() => { setActiveCategory(cat); setActiveGenre(null); }}
                   className={`text-[15px] transition-colors ${
                     activeCategory === cat
                       ? "text-white font-semibold"
@@ -300,6 +310,33 @@ export function AppGallery({
             ))}
           </div>
 
+          {/* Genre filter chips */}
+          <div className="flex items-center gap-2 flex-wrap pb-3">
+            <button
+              onClick={() => setActiveGenre(null)}
+              className={`px-3 py-1 rounded-full text-[12px] font-medium transition-colors ${
+                activeGenre === null
+                  ? "bg-white text-black"
+                  : "bg-white/[0.08] text-white/60 hover:bg-white/[0.12] hover:text-white"
+              }`}
+            >
+              All
+            </button>
+            {availableGenres.map((genre) => (
+              <button
+                key={genre}
+                onClick={() => setActiveGenre(activeGenre === genre ? null : genre)}
+                className={`px-3 py-1 rounded-full text-[12px] font-medium transition-colors ${
+                  activeGenre === genre
+                    ? "bg-white text-black"
+                    : "bg-white/[0.08] text-white/60 hover:bg-white/[0.12] hover:text-white"
+                }`}
+              >
+                {genre}
+              </button>
+            ))}
+          </div>
+
           {/* Filter bar */}
           <div className="flex items-center justify-between pt-2 pb-4">
             <div className="flex items-center gap-1">
@@ -307,7 +344,7 @@ export function AppGallery({
               {activeCategory !== "Landing Pages" && (
                 <div className="flex items-center bg-white/[0.08] rounded-full p-1 mr-4">
                   <button
-                    onClick={() => setActiveCategory("Mobile Apps")}
+                    onClick={() => { setActiveCategory("Mobile Apps"); setActiveGenre(null); }}
                     className={`px-3 py-1 text-[12px] font-medium rounded-full transition-colors ${
                       activeCategory === "Mobile Apps"
                         ? "bg-white/[0.15] text-white"
@@ -317,7 +354,7 @@ export function AppGallery({
                     iOS
                   </button>
                   <button
-                    onClick={() => setActiveCategory("Web Apps")}
+                    onClick={() => { setActiveCategory("Web Apps"); setActiveGenre(null); }}
                     className={`px-3 py-1 text-[12px] font-medium rounded-full transition-colors ${
                       activeCategory === "Web Apps"
                         ? "bg-white/[0.15] text-white"
@@ -423,6 +460,8 @@ export function AppGallery({
                         {getDisplayName(app.name)}
                       </h3>
                       <p className="text-[13px] text-white/40 truncate">
+                        <span className="text-white/30">{app.genre}</span>
+                        {" · "}
                         {app.screenCount} screen
                         {app.screenCount !== 1 ? "s" : ""}
                         {app.date ? ` · ${app.date}` : ""}

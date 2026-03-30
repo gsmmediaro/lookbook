@@ -13,6 +13,125 @@ export interface AppEntry {
   platform: string;
   date: string;
   category: Category;
+  genre: string;
+}
+
+const APP_GENRES: Record<string, string> = {
+  // Mobile Apps
+  "Ada": "Mental Health",
+  "Alan Mind": "Mental Health",
+  "Alma": "Mental Health",
+  "Angi": "Home Services",
+  "BeReal.": "Social",
+  "Bevel": "Lifestyle",
+  "BFF": "Social",
+  "BitePal": "Food & Nutrition",
+  "Bloom": "Mental Health",
+  "Brainly": "Education",
+  "Cal AI": "AI",
+  "Centr": "Health & Fitness",
+  "Character AI": "AI",
+  "Co–Star": "Lifestyle",
+  "Docusign": "Productivity",
+  "Dot": "AI",
+  "Endel": "Wellness",
+  "Expensify": "Finance",
+  "Fitplan": "Health & Fitness",
+  "Gas": "Social",
+  "Greg": "Productivity",
+  "Hevy": "Health & Fitness",
+  "informed News": "News",
+  "Ladder": "Finance",
+  "Lifesum": "Health & Fitness",
+  "Lovi": "AI",
+  "MacroFactor": "Health & Fitness",
+  "NGL": "Social",
+  "Particle News": "News",
+  "Peloton Strength+": "Health & Fitness",
+  "Perplexity": "AI",
+  "Pillow": "Health & Fitness",
+  "pillowtalk": "Social",
+  "QUITTR": "Wellness",
+  "Raycast": "Productivity",
+  "Speechify": "Education",
+  "stoic.": "Wellness",
+  "talktolewis": "AI",
+  "Tolan": "AI",
+  "Uxcel Go": "Education",
+  "Vibecode": "Developer Tools",
+  "Vocabulary": "Education",
+  // Web Apps
+  "Aboard": "Productivity",
+  "Air": "Creative",
+  "Amie": "Productivity",
+  "Assembly": "AI",
+  "Claude": "AI",
+  "Clockwise": "Productivity",
+  "Cursor": "Developer Tools",
+  "ElevenLabs": "AI",
+  "Elicit": "AI",
+  "Employment Hero": "HR & Business",
+  "Fabric": "Productivity",
+  "Front": "Communication",
+  "Grain": "Productivity",
+  "Grammarly": "Productivity",
+  "Graphite": "Developer Tools",
+  "Gusto": "HR & Business",
+  "Heidi": "Health & Fitness",
+  "Lindy": "AI",
+  "Lovable": "Developer Tools",
+  "Manus": "AI",
+  "Matter": "Productivity",
+  "Mercury": "Finance",
+  "Notion": "Productivity",
+  "OpenAI": "AI",
+  "Optimal Workshop": "UX Research",
+  "Otter.ai": "AI",
+  "Oyster": "HR & Business",
+  "Peerlist": "Social",
+  "Profound": "Marketing",
+  "Remote": "HR & Business",
+  "Sana AI": "AI",
+  "Sketch": "Creative",
+  "Slite": "Productivity",
+  "Sprig": "UX Research",
+  "Stripe": "Finance",
+  "Superhuman Mail": "Communication",
+  "Tally": "Productivity",
+  // Landing Pages
+  "Amplemarket": "Sales & CRM",
+  "Apollo": "Sales & CRM",
+  "Attio": "Sales & CRM",
+  "Bird": "Communication",
+  "Clay": "Sales & CRM",
+  "Deta": "Developer Tools",
+  "Duna": "Finance",
+  "Duolingo": "Education",
+  "Giga": "Developer Tools",
+  "incident.io": "Developer Tools",
+  "Loops": "Marketing",
+  "mymind": "Productivity",
+  "Okta": "Security",
+  "Portrait": "Creative",
+  "Qatalog": "Productivity",
+  "Sequence": "Finance",
+  "stop fraud": "Security",
+  "Strut": "Creative",
+  "Vercel": "Developer Tools",
+  "Visitors": "Analytics",
+};
+
+function getGenre(name: string): string {
+  return APP_GENRES[name] ?? "Other";
+}
+
+function parseDisplayName(folderName: string, category: Category): string {
+  if (category === "Landing Pages") return folderName;
+  const parts = folderName.split(" ");
+  const platformIdx = parts.findIndex(
+    (p) => p.toLowerCase() === "web" || p.toLowerCase() === "ios" || p.toLowerCase() === "android"
+  );
+  return platformIdx > 0 ? parts.slice(0, platformIdx).join(" ") : folderName;
 }
 
 export interface ScreenEntry {
@@ -81,6 +200,7 @@ export function getApps(category?: Category): AppEntry[] {
         });
 
       const { platform, date } = parseAppFolder(folder, cat as Category);
+      const displayName = parseDisplayName(folder, cat as Category);
 
       allApps.push({
         name: folder,
@@ -93,6 +213,7 @@ export function getApps(category?: Category): AppEntry[] {
         platform,
         date,
         category: cat as Category,
+        genre: getGenre(displayName),
       });
     }
   }
