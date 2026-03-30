@@ -1,0 +1,31 @@
+{
+  "name": "lookbook-mcp",
+  "version": "1.0.0",
+  "description": "LookBook — MCP server that lets AI agents browse, analyze, and replicate designs from a curated screenshot library",
+  "main": "dist/index.js",
+  "bin": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "mcp",
+    "design",
+    "lookbook",
+    "design-system"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }
+}

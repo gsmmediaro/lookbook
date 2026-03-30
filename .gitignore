@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+.next/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Designs (large binary assets — bring your own Mobbin exports)
+designs/
+app/public/designs/
+
+# Screenshots and local assets
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
