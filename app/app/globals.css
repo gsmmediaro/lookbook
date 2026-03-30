@@ -128,3 +128,22 @@
     @apply font-sans;
   }
 }
+
+@keyframes auth-scroll-up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(calc(-1 * var(--scroll-distance)));
+  }
+}
+
+.auth-scroll-column {
+  animation: auth-scroll-up var(--scroll-duration, 60s) linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-scroll-column {
+    animation: none;
+  }
+}

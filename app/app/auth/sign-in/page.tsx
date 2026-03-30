@@ -1,127 +1,36 @@
-'use client';
+import fs from 'node:fs';
+import path from 'node:path';
+import { SignInClient } from './client';
 
-import { useActionState } from 'react';
-import Link from 'next/link';
-import { signInWithEmail } from './actions';
-import { authClient } from '@/lib/auth/client';
+function getMobileAppScreens(): string[] {
+  const mobileDir = path.join(process.cwd(), 'public', 'designs', 'Mobile Apps');
+  if (!fs.existsSync(mobileDir)) return [];
+
+  const folders = fs.readdirSync(mobileDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name);
+
+  const screens: string[] = [];
+  for (const folder of folders) {
+    const folderPath = path.join(mobileDir, folder);
+    const images = fs.readdirSync(folderPath)
+      .filter((f) => /\.(png|jpg|jpeg|webp)$/i.test(f))
+      .sort((a, b) => {
+        const numA = parseInt(a.match(/(\d+)\.\w+$/)?.[1] || '0');
+        const numB = parseInt(b.match(/(\d+)\.\w+$/)?.[1] || '0');
+        return numA - numB;
+      });
+    // Pick a content screen (skip splash/onboarding), fallback to index 0
+    const pick = images[Math.min(3, images.length - 1)];
+    if (pick) {
+      screens.push(`/designs/Mobile Apps/${folder}/${pick}`);
+    }
+  }
+
+  return screens;
+}
 
 export default function SignInPage() {
-  const [state, formAction, isPending] = useActionState(signInWithEmail, null);
-
-  return (
-    <div className="flex min-h-screen">
-      {/* Left panel - Auth form */}
-      <div className="flex w-full lg:w-1/2 flex-col items-center justify-center bg-[#0D0D0D] px-6">
-        <div className="w-full max-w-sm space-y-8">
-          {/* Logo */}
-          <div className="flex flex-col items-center gap-4">
-            <svg width="40" height="24" viewBox="0 0 40 24" fill="none">
-              <path
-                d="M8 4C8 1.79 9.79 0 12 0h4c2.21 0 4 1.79 4 4v16c0 2.21-1.79 4-4 4h-4c-2.21 0-4-1.79-4-4V4z"
-                fill="white"
-              />
-              <path
-                d="M0 8c0-2.21 1.79-4 4-4h4c2.21 0 4 1.79 4 4v12c0 2.21-1.79 4-4 4H4c-2.21 0-4-1.79-4-4V8z"
-                fill="white"
-                opacity="0.6"
-              />
-              <path
-                d="M20 8c0-2.21 1.79-4 4-4h4c2.21 0 4 1.79 4 4v12c0 2.21-1.79 4-4 4h-4c-2.21 0-4-1.79-4-4V8z"
-                fill="white"
-                opacity="0.6"
-              />
-            </svg>
-            <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          </div>
-
-          {/* OAuth buttons */}
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => authClient.signIn.social({ provider: 'google' })}
-              className="flex w-full items-center justify-center gap-3 rounded-full border border-white/20 bg-transparent px-4 py-3 text-sm font-medium text-white transition hover:bg-white/5"
-            >
-              <svg width="18" height="18" viewBox="0 0 18 18">
-                <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-                <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-                <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-                <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-              </svg>
-              Continue with Google
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="text-sm text-white/40">or</span>
-            <div className="h-px flex-1 bg-white/10" />
-          </div>
-
-          {/* Email form */}
-          <form action={formAction} className="space-y-4">
-            <input
-              name="email"
-              type="email"
-              required
-              placeholder="Enter email address"
-              className="w-full rounded-full border border-white/20 bg-white/5 px-5 py-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/40 transition"
-            />
-            <input
-              name="password"
-              type="password"
-              required
-              placeholder="Enter password"
-              className="w-full rounded-full border border-white/20 bg-white/5 px-5 py-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/40 transition"
-            />
-
-            {state?.error && (
-              <p className="text-sm text-red-400">{state.error}</p>
-            )}
-
-            <button
-              type="submit"
-              disabled={isPending}
-              className="w-full rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-white/90 disabled:opacity-50"
-            >
-              {isPending ? 'Signing in...' : 'Continue'}
-            </button>
-          </form>
-
-          {/* Footer */}
-          <p className="text-center text-xs text-white/40">
-            By continuing, you agree to our{' '}
-            <Link href="/terms" className="underline hover:text-white/60">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="underline hover:text-white/60">
-              Privacy Policy
-            </Link>
-            .
-          </p>
-
-          <p className="text-center text-sm text-white/50">
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/sign-up" className="text-white underline hover:text-white/80">
-              Sign up
-            </Link>
-          </p>
-        </div>
-      </div>
-
-      {/* Right panel - Design collage */}
-      <div className="hidden lg:block lg:w-1/2 bg-[#141414] relative overflow-hidden">
-        <div className="absolute inset-0 grid grid-cols-3 gap-3 p-6 opacity-30 rotate-[-6deg] scale-110">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={i}
-              className="rounded-2xl bg-white/5 aspect-[9/16]"
-            />
-          ))}
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-[#141414]" />
-      </div>
-    </div>
-  );
+  const screens = getMobileAppScreens();
+  return <SignInClient covers={screens} />;
 }
